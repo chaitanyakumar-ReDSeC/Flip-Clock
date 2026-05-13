@@ -1,0 +1,43 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-surface-dark: #000000;
+  --color-surface-light: #ffffff;
+
+  @keyframes blink-red {
+    0%, 100% { background-color: #000000; color: #ffffff; }
+    50% { background-color: #dc2626; color: #000000; }
+  }
+}
+
+@layer base {
+  body {
+    @apply font-sans antialiased overflow-hidden select-none transition-colors duration-500;
+  }
+
+  .digit-font {
+    @apply font-display font-bold leading-none tracking-tighter;
+  }
+}
+
+@layer components {
+  .glossy-glass {
+    @apply relative overflow-hidden rounded-lg shadow-2xl;
+  }
+
+  .glossy-glass::before {
+    content: "";
+    @apply absolute top-0 left-0 right-0 h-1/2 bg-white/5 z-10 pointer-events-none;
+    background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 100%);
+  }
+
+  .glossy-glass::after {
+    content: "";
+    @apply absolute top-1/2 left-0 right-0 h-[2px] bg-black/40 z-20 -translate-y-1/2;
+  }
+}
