@@ -15,7 +15,7 @@ type ThemeMode = 'light' | 'dark';
 
 const FlipCard = ({ digit, isFinished }: { digit: string | number; isFinished?: boolean }) => {
   return (
-    <div className={`glossy-glass w-16 h-28 sm:w-28 sm:h-44 flex items-center justify-center transition-colors duration-150 
+    <div className={`glossy-glass w-16 h-28 sm:w-44 sm:h-64 flex items-center justify-center transition-colors duration-150 
       ${isFinished ? 'bg-black/20' : 'bg-[#1e1e1e]'}
     `}>
       <AnimatePresence mode="wait">
@@ -25,7 +25,7 @@ const FlipCard = ({ digit, isFinished }: { digit: string | number; isFinished?: 
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -20, opacity: 0 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
-          className={`digit-font text-6xl sm:text-9xl transition-colors ${isFinished ? 'text-black' : 'text-[#d1d1d1]'}`}
+          className={`digit-font text-6xl sm:text-[11rem] transition-colors ${isFinished ? 'text-black' : 'text-[#d1d1d1]'}`}
         >
           {digit}
         </motion.span>
@@ -37,7 +37,7 @@ const FlipCard = ({ digit, isFinished }: { digit: string | number; isFinished?: 
 const DigitPair = ({ value, isFinished }: { value: number; isFinished?: boolean }) => {
   const str = value.toString().padStart(2, '0');
   return (
-    <div className="flex gap-1 sm:gap-2">
+    <div className="flex gap-1 sm:gap-3">
       <FlipCard digit={str[0]} isFinished={isFinished} />
       <FlipCard digit={str[1]} isFinished={isFinished} />
     </div>
@@ -45,9 +45,9 @@ const DigitPair = ({ value, isFinished }: { value: number; isFinished?: boolean 
 };
 
 const Colon = ({ isFinished }: { isFinished?: boolean }) => (
-  <div className="flex flex-col gap-4 sm:gap-6 px-1 sm:px-2">
-    <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-sm transition-colors ${isFinished ? 'bg-black' : 'bg-[#333]'}`} />
-    <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-sm transition-colors ${isFinished ? 'bg-black' : 'bg-[#333]'}`} />
+  <div className="flex flex-col gap-4 sm:gap-8 px-1 sm:px-3">
+    <div className={`w-2 h-2 sm:w-4 sm:h-4 rounded-sm transition-colors ${isFinished ? 'bg-black' : 'bg-[#333]'}`} />
+    <div className={`w-2 h-2 sm:w-4 sm:h-4 rounded-sm transition-colors ${isFinished ? 'bg-black' : 'bg-[#333]'}`} />
   </div>
 );
 
@@ -62,9 +62,54 @@ export default function App() {
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
 
-  const initialTotalSeconds = useMemo(() => {
-    return timerInputs.h * 3600 + timerInputs.m * 60 + timerInputs.s;
-  }, [timerInputs]);
+  // --- Feature: Fullscreen Logic ---
+  const toggleFullScreen = useCallback((e: React.MouseEvent) => {
+    // Prevent fullscreen toggle if clicking buttons, inputs, or the toggle switch
+    const target = e.target as HTMLElement;
+    if (
+      target.closest('button') || 
+      target.closest('input') || 
+      target.closest('.cursor-pointer')
+    ) return;
+
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch((err) => {
+        console.error(`Error attempting to enable fullscreen: ${err.message}`);
+      });
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  }, []);
+
+  // --- Feature: Stay Awake (Screen Wake Lock) ---
+  useEffect(() => {
+    let wakeLock: any = null;
+    const requestWakeLock = async () => {
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLock = await (navigator as any).wakeLock.request('screen');
+        }
+      } catch (err) {
+        // Silently fail if not supported
+      }
+    };
+
+    requestWakeLock();
+
+    const handleVisibilityChange = async () => {
+      if (wakeLock !== null && document.visibilityState === 'visible') {
+        await requestWakeLock();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      wakeLock?.release();
+    };
+  }, []);
 
   // Update Clock
   useEffect(() => {
@@ -104,21 +149,17 @@ export default function App() {
     setHasStarted(false);
   }, []);
 
-  const formatHeaderTime = (date: Date) => {
-    return date.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-    }).replace(/\s+/g, '');
-  };
+  // --- UI Formatting ---
+  const dateStr = useMemo(() => {
+    const day = currentTime.getDate();
+    const month = currentTime.toLocaleString('en-US', { month: 'long' }).toUpperCase();
+    const year = currentTime.getFullYear();
+    return `${day} ${month} ${year}`;
+  }, [currentTime]);
 
-  const formatHeaderDate = (date: Date) => {
-    const day = date.getDate();
-    const month = date.toLocaleString('en-US', { month: 'long' }).toUpperCase();
-    const year = date.getFullYear();
-    const weekday = date.toLocaleString('en-US', { weekday: 'long' }).toUpperCase();
-    return `${day} ${month} ${year}    ${weekday}`;
-  };
+  const weekdayStr = useMemo(() => {
+    return currentTime.toLocaleString('en-US', { weekday: 'long' }).toUpperCase();
+  }, [currentTime]);
 
   const isEmergency = isTimerRunning && timeLeft <= 10 && timeLeft > 0;
   const isEmergencyRed = isEmergency && timeLeft % 2 === 0;
@@ -127,17 +168,24 @@ export default function App() {
   const showHaltColors = isEmergencyRed || isFinished;
 
   return (
-    <div className={`min-h-screen transition-all duration-150 flex flex-col 
-      ${mode === 'dark' ? 'bg-black text-white' : 'bg-white text-black'}
-      ${showHaltColors ? 'bg-red-600 !text-black' : ''}
-    `}>
+    <div 
+      onDoubleClick={toggleFullScreen}
+      className={`min-h-screen transition-all duration-150 flex flex-col 
+        ${mode === 'dark' ? 'bg-black text-white' : 'bg-white text-black'}
+        ${showHaltColors ? 'bg-red-600 !text-black' : ''}
+      `}
+    >
       {/* Header */}
-      <header className="p-6 sm:p-10 flex justify-between items-start">
+      <header className="p-6 sm:p-10 flex justify-between items-center">
         <div className="w-24 hidden sm:block" />
 
-        <div className="text-center">
-          <h2 className={`text-xl font-bold tracking-[0.2em] uppercase transition-colors ${showHaltColors ? 'text-black' : ''}`}>
-            {formatHeaderDate(currentTime)}
+        <div className="text-center flex items-center gap-4 sm:gap-8">
+          <h2 className={`text-2xl sm:text-4xl font-extrabold tracking-[0.1em] transition-colors ${showHaltColors ? 'text-black' : ''}`}>
+            {dateStr}
+          </h2>
+          <span className={`text-2xl sm:text-4xl font-light opacity-30 ${showHaltColors ? 'text-black opacity-50' : ''}`}>|</span>
+          <h2 className={`text-2xl sm:text-4xl font-extrabold tracking-[0.1em] transition-colors ${showHaltColors ? 'text-black' : ''}`}>
+            {weekdayStr}
           </h2>
         </div>
 
@@ -145,9 +193,9 @@ export default function App() {
           <div className={`h-0.5 bg-current transition-all ${view === 'timer' ? 'w-8' : 'w-6'} ${showHaltColors ? 'bg-black' : ''}`} />
           <div className={`h-0.5 bg-current transition-all ${view === 'timer' ? 'w-6' : 'w-8'} ${showHaltColors ? 'bg-black' : ''}`} />
           {view === 'clock' ? (
-            <Timer className={`mt-2 w-7 h-7 opacity-70 hover:opacity-100 transition-all ${showHaltColors ? 'text-black' : ''}`} />
+            <Timer className={`mt-2 w-8 h-8 opacity-70 hover:opacity-100 transition-all ${showHaltColors ? 'text-black' : ''}`} />
           ) : (
-            <Clock className={`mt-2 w-7 h-7 opacity-70 hover:opacity-100 transition-all ${showHaltColors ? 'text-black' : ''}`} />
+            <Clock className={`mt-2 w-8 h-8 opacity-70 hover:opacity-100 transition-all ${showHaltColors ? 'text-black' : ''}`} />
           )}
         </div>
       </header>
@@ -160,8 +208,8 @@ export default function App() {
             animate={{ opacity: 1, scale: 1 }}
             className="flex flex-col items-center gap-12"
           >
-            <div className="flex items-center gap-2 sm:gap-4">
-              <DigitPair value={currentTime.getHours() % 12 || 12} isFinished={showHaltColors} />
+            <div className="flex items-center gap-2 sm:gap-6">
+              <DigitPair value={currentTime.getHours()} isFinished={showHaltColors} />
               <Colon isFinished={showHaltColors} />
               <DigitPair value={currentTime.getMinutes()} isFinished={showHaltColors} />
               <Colon isFinished={showHaltColors} />
@@ -172,9 +220,9 @@ export default function App() {
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col items-center gap-12 w-full max-w-2xl"
+            className="flex flex-col items-center gap-12 w-full max-w-4xl"
           >
-            <div className="flex items-center gap-2 sm:gap-4">
+            <div className="flex items-center gap-2 sm:gap-6">
               <DigitPair value={Math.floor(timeLeft / 3600)} isFinished={showHaltColors} />
               <Colon isFinished={showHaltColors} />
               <DigitPair value={Math.floor((timeLeft % 3600) / 60)} isFinished={showHaltColors} />
@@ -241,10 +289,9 @@ export default function App() {
           onClick={() => setMode(mode === 'light' ? 'dark' : 'light')}
           className="opacity-70 hover:opacity-100 transition-all hover:scale-110 active:scale-90"
         >
-          <Lightbulb className={`w-10 h-10 transition-colors ${mode === 'light' ? 'fill-yellow-400 text-yellow-500' : 'text-white'} ${showHaltColors ? '!text-black' : ''}`} />
+          <Lightbulb className={`w-12 h-12 transition-colors ${mode === 'light' ? 'fill-yellow-400 text-yellow-500' : 'text-white'} ${showHaltColors ? '!text-black' : ''}`} />
         </button>
       </footer>
     </div>
   );
 }
-
