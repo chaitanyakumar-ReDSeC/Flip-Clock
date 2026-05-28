@@ -15,7 +15,7 @@ Developed by **Chaitanya Kumar Sathivada**
 
 Access the latest stable version of PopCorn directly on your browser. Click on the button below to access the site:
 
-<a href="https://chaitanyakumar-ReDSeC.github.io/PopCorn/" target="_blank">
+<a href="https://chaitanyakumar-redsec.github.io/Flip-Clock/" target="_blank">
         <img src="https://github.com/chaitanyakumar-ReDSeC/assets/raw/main/projects_repo/Misc/VisitNow.png" alt="Visit Now" height=50>
 </a>
 
