@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -17,7 +17,8 @@
 
 @layer base {
   body {
-    @apply font-sans antialiased overflow-hidden select-none transition-colors duration-500;
+    @apply font-sans antialiased overflow-hidden select-none transition-colors duration-500 min-h-screen max-w-full;
+    touch-action: manipulation;
   }
 
   .digit-font {
@@ -27,7 +28,7 @@
 
 @layer components {
   .glossy-glass {
-    @apply relative overflow-hidden rounded-lg shadow-2xl;
+    @apply relative overflow-hidden rounded-md sm:rounded-lg shadow-2xl;
   }
 
   .glossy-glass::before {
@@ -38,6 +39,6 @@
 
   .glossy-glass::after {
     content: "";
-    @apply absolute top-1/2 left-0 right-0 h-[2px] bg-black/40 z-20 -translate-y-1/2;
+    @apply absolute top-1/2 left-0 right-0 h-[1px] sm:h-[2px] bg-black/40 z-20 -translate-y-1/2;
   }
 }
