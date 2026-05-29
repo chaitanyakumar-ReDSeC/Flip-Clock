@@ -324,8 +324,8 @@ export default function App() {
               </div>
             </div>
           </motion.a>
-          <button onClick={() => setMode(mode === 'light' ? 'dark' : 'light')} className="p-3 opacity-60 hover:opacity-100">
-            <Lightbulb className={mode === 'light' ? 'fill-yellow-400 text-yellow-500 w-5 h-5' : 'w-5 h-5'} />
+          <button onClick={() => setMode(mode === 'light' ? 'dark' : 'light')} className="p-3 opacity-60 hover:opacity-100 transition-transform hover:scale-110 active:scale-95">
+            <Lightbulb className={mode === 'light' ? 'fill-yellow-400 text-yellow-500 w-6 h-6 lg:w-8 lg:h-8' : 'w-6 h-6 lg:w-8 lg:h-8'} />
           </button>
         </footer>
       </div>
