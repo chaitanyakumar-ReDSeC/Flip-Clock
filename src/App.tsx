@@ -181,17 +181,19 @@ export default function App() {
 
   useEffect(() => {
     if (activeDial) {
-      window.addEventListener('mousemove', handleDialMove);
-      window.addEventListener('mouseup', () => setActiveDial(null));
-      window.addEventListener('touchmove', handleDialMove);
-      window.addEventListener('touchend', () => setActiveDial(null));
+      const move = (e: MouseEvent | TouchEvent) => handleDialMove(e);
+      const end = () => setActiveDial(null);
+      window.addEventListener('mousemove', move);
+      window.addEventListener('mouseup', end);
+      window.addEventListener('touchmove', move);
+      window.addEventListener('touchend', end);
+      return () => {
+        window.removeEventListener('mousemove', move);
+        window.removeEventListener('mouseup', end);
+        window.removeEventListener('touchmove', move);
+        window.removeEventListener('touchend', end);
+      };
     }
-    return () => {
-      window.removeEventListener('mousemove', handleDialMove);
-      window.removeEventListener('mouseup', () => setActiveDial(null));
-      window.removeEventListener('touchmove', handleDialMove);
-      window.removeEventListener('touchend', () => setActiveDial(null));
-    };
   }, [activeDial, handleDialMove]);
 
   const toggleTimer = () => {
@@ -216,64 +218,67 @@ export default function App() {
   return (
     <>
       {isLoading && <LoadingScreen onFinish={() => setIsLoading(false)} />}
-      
-      <div onDoubleClick={toggleFullScreen} className={`min-h-screen transition-all duration-300 flex flex-col justify-between overflow-hidden px-8 lg:px-20 ${mode === 'dark' ? 'bg-[#080808] text-white' : 'bg-[#f4f4f6] text-black'} ${showHaltColors ? 'bg-red-600 !text-black' : ''}`}>
-        <header className="py-10 lg:py-14 flex justify-between items-center w-full">
-          <div className="hidden sm:block w-12" />
-          <div className="text-center flex gap-6 items-center">
-            <h2 className={`text-xl lg:text-2xl font-extrabold tracking-[0.15em] ${showHaltColors ? 'text-black' : ''}`}>
+      <div onDoubleClick={toggleFullScreen} className={`h-[100dvh] w-[100dvw] transition-all duration-300 flex flex-col justify-between overflow-hidden px-4 lg:px-20 ${mode === 'dark' ? 'bg-[#080808] text-white' : 'bg-[#f4f4f6] text-black'} ${showHaltColors ? 'bg-red-600 !text-black' : ''}`}>
+        <header className="relative py-6 lg:py-14 flex items-center justify-center w-full shrink-0">
+          <div className="absolute left-0">
+             <div className="w-10 h-10 md:w-12 md:h-12" />
+          </div>
+          <div className="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-6 text-center">
+            <h2 className={`text-sm md:text-xl lg:text-2xl font-extrabold tracking-[0.15em] ${showHaltColors ? 'text-black' : ''}`}>
               {currentTime.getDate()} {currentTime.toLocaleString('en-US', { month: 'long' }).toUpperCase()} {currentTime.getFullYear()}
             </h2>
-            <span className="opacity-20">|</span>
-            <h2 className={`text-xl lg:text-2xl font-extrabold tracking-[0.15em] ${showHaltColors ? 'text-black' : ''}`}>
+            <span className="opacity-20 hidden md:block">|</span>
+            <h2 className={`text-sm md:text-xl lg:text-2xl font-extrabold tracking-[0.15em] ${showHaltColors ? 'text-black' : ''}`}>
               {currentTime.toLocaleString('en-US', { weekday: 'long' }).toUpperCase()}
             </h2>
           </div>
-          <button onClick={() => setView(view === 'clock' ? 'timer' : 'clock')} className="p-3 opacity-60 hover:opacity-100 transition-transform hover:scale-110 active:scale-95">
-            <Hourglass className="w-7 h-7" />
-          </button>
+          <div className="absolute right-0">
+            <button onClick={() => setView(view === 'clock' ? 'timer' : 'clock')} className="p-3 opacity-60 hover:opacity-100 transition-transform hover:scale-110 active:scale-95">
+              <Hourglass className="w-5 h-5 lg:w-7 lg:h-7" />
+            </button>
+          </div>
         </header>
-
-        <main className="flex-grow flex flex-col items-center justify-center relative">
+        <main className="flex-grow flex flex-col items-center justify-center relative w-full overflow-hidden">
           <AnimatePresence mode="wait">
             {view === 'clock' ? (
-              <motion.div key="clock-display" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} className="flex items-center justify-center">
+              <motion.div key="clock-display" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} className="flex flex-col md:flex-row items-center justify-center scale-90 sm:scale-100 gap-4 md:gap-0">
                 <DigitPair value={currentTime.getHours()} isFinished={false} />
-                <Colon isFinished={false} />
+                <div className="hidden md:block"><Colon isFinished={false} /></div>
+                <div className="md:hidden"><div className="flex gap-2 p-2 opacity-50"><div className="w-1.5 h-1.5 rounded-full bg-current" /><div className="w-1.5 h-1.5 rounded-full bg-current" /></div></div>
                 <DigitPair value={currentTime.getMinutes()} isFinished={false} />
-                <Colon isFinished={false} />
+                <div className="hidden md:block"><Colon isFinished={false} /></div>
+                <div className="md:hidden"><div className="flex gap-2 p-2 opacity-50"><div className="w-1.5 h-1.5 rounded-full bg-current" /><div className="w-1.5 h-1.5 rounded-full bg-current" /></div></div>
                 <DigitPair value={currentTime.getSeconds()} isFinished={false} />
               </motion.div>
             ) : (
-              <motion.div key="timer-display" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} className="flex flex-col items-center justify-center">
-                <div className="flex items-center justify-center">
+              <motion.div key="timer-display" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} className="flex flex-col items-center justify-center scale-90 sm:scale-100">
+                <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-0">
                   <DigitPair value={Math.floor(timeLeft / 3600)} isFinished={showHaltColors} />
-                  <Colon isFinished={showHaltColors} />
+                  <div className="hidden md:block"><Colon isFinished={showHaltColors} /></div>
                   <DigitPair value={Math.floor((timeLeft % 3600) / 60)} isFinished={showHaltColors} />
-                  <Colon isFinished={showHaltColors} />
+                  <div className="hidden md:block"><Colon isFinished={showHaltColors} /></div>
                   <DigitPair value={timeLeft % 60} isFinished={showHaltColors} />
                 </div>
-
-                <div className="mt-12 flex flex-col items-center gap-8">
-                  <div className="flex gap-16">
+                <div className="mt-8 lg:mt-12 flex flex-col items-center gap-6 lg:gap-8">
+                  <div className="flex gap-8 lg:gap-16">
                     {(['h', 'm', 's'] as const).map((unit) => (
                       <div key={unit} className="flex flex-col items-center">
                         <span className="text-[10px] uppercase tracking-widest opacity-40 mb-2">{unit === 'h' ? 'Hrs' : unit === 'm' ? 'Min' : 'Sec'}</span>
                         <button
                           onMouseDown={() => !isTimerRunning && setActiveDial(unit)}
-                          className={`dial-trigger w-12 h-12 rounded-full border-2 border-current flex items-center justify-center transition-all ${activeDial === unit ? 'scale-125 bg-current text-reverse' : 'opacity-60 hover:opacity-100'}`}
+                          onTouchStart={() => !isTimerRunning && setActiveDial(unit)}
+                          className={`dial-trigger w-10 h-10 lg:w-12 lg:h-12 rounded-full border-2 border-current flex items-center justify-center transition-all ${activeDial === unit ? 'scale-125 bg-current text-reverse' : 'opacity-60 hover:opacity-100'}`}
                         >
                           <span className="font-mono font-bold">{timerInputs[unit]}</span>
                         </button>
                       </div>
                     ))}
                   </div>
-
                   <div className="flex gap-4">
-                    <button onClick={toggleTimer} className={`px-10 py-3 rounded-full font-bold uppercase tracking-widest text-xs transition-all ${showHaltColors ? 'bg-black text-red-600' : 'bg-current text-black'}`} style={{backgroundColor: showHaltColors ? '' : 'white'}}>
+                    <button onClick={toggleTimer} className={`px-8 lg:px-10 py-2 lg:py-3 rounded-full font-bold uppercase tracking-widest text-[10px] lg:text-xs transition-all ${showHaltColors ? 'bg-black text-red-600' : 'bg-current text-black'}`} style={{backgroundColor: showHaltColors ? '' : 'white'}}>
                       {isTimerRunning ? 'Pause' : 'Start'}
                     </button>
-                    <button onClick={resetTimer} className="px-10 py-3 rounded-full border border-current font-bold uppercase tracking-widest text-xs opacity-70 hover:opacity-100">
+                    <button onClick={resetTimer} className="px-8 lg:px-10 py-2 lg:py-3 rounded-full border border-current font-bold uppercase tracking-widest text-[10px] lg:text-xs opacity-70 hover:opacity-100">
                       Reset
                     </button>
                   </div>
@@ -281,27 +286,25 @@ export default function App() {
               </motion.div>
             )}
           </AnimatePresence>
-
           <AnimatePresence>
             {activeDial && (
               <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }} className="absolute inset-0 flex items-center justify-center z-50 pointer-events-none">
-                <div ref={dialRef} className="w-80 h-80 rounded-full border-[1px] border-white/10 bg-white/5 backdrop-blur-md relative flex items-center justify-center">
+                <div ref={dialRef} className="w-64 h-64 lg:w-80 lg:h-80 rounded-full border-[1px] border-white/10 bg-white/5 backdrop-blur-md relative flex items-center justify-center">
                   {[...Array(activeDial === 'h' ? 24 : 60)].map((_, i) => (
                     (i % (activeDial === 'h' ? 2 : 5) === 0) && (
-                      <div key={i} className="absolute text-[10px] font-mono opacity-40" style={{ transform: `rotate(${i * (360/(activeDial === 'h' ? 24 : 60))}deg) translateY(-130px)` }}>
+                      <div key={i} className="absolute text-[10px] font-mono opacity-40" style={{ transform: `rotate(${i * (360/(activeDial === 'h' ? 24 : 60))}deg) translateY(-110px)` }}>
                         {i}
                       </div>
                     )
                   ))}
-                  <div className="w-1 h-32 bg-current absolute top-1/2 left-1/2 -translate-x-1/2 origin-top rounded-full" style={{ transform: `rotate(${180 + (timerInputs[activeDial] * (360/(activeDial === 'h' ? 24 : 60)))}deg)` }} />
-                  <div className="text-4xl font-bold font-display">{timerInputs[activeDial]}</div>
+                  <div className="w-1 h-24 lg:h-32 bg-current absolute top-1/2 left-1/2 -translate-x-1/2 origin-top rounded-full" style={{ transform: `rotate(${180 + (timerInputs[activeDial] * (360/(activeDial === 'h' ? 24 : 60)))}deg)` }} />
+                  <div className="text-3xl lg:text-4xl font-bold font-display">{timerInputs[activeDial]}</div>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
         </main>
-
-        <footer className="py-10 flex justify-between items-center">
+        <footer className="py-6 lg:py-10 flex justify-between items-center shrink-0">
           <motion.a 
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
@@ -309,21 +312,20 @@ export default function App() {
             href="https://github.com/chaitanyakumar-ReDSeC" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="w-12 h-12 block rounded-full overflow-hidden hover:scale-[1.5] transition-all duration-500 ease-in-out relative group"
+            className="w-10 h-10 lg:w-12 lg:h-12 block rounded-full overflow-hidden hover:scale-[1.5] transition-all duration-500 ease-in-out relative group"
             style={{ perspective: '1000px' }}
           >
             <div className="relative w-full h-full transition-transform duration-500 group-hover:rotate-y-180" style={{ transformStyle: 'preserve-3d' }}>
-                <div className="absolute inset-0 w-full h-full" style={{ backfaceVisibility: 'hidden' }}>
-                    <img src="https://github.com/chaitanyakumar-ReDSeC/assets/raw/main/general/image_assets/git-hub.png" alt="GitHub Logo" className="w-full h-full object-cover" />
-                </div>
-                <div className="absolute inset-0 w-full h-full" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
-                    <img src="https://avatars.githubusercontent.com/u/146118747?v=4" alt="Profile" className="w-full h-full object-cover" />
-                </div>
+              <div className="absolute inset-0 w-full h-full" style={{ backfaceVisibility: 'hidden' }}>
+                <img src="https://github.com/chaitanyakumar-ReDSeC/assets/raw/main/general/image_assets/git-hub.png" alt="GitHub Logo" className="w-full h-full object-cover" />
+              </div>
+              <div className="absolute inset-0 w-full h-full" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
+                <img src="https://avatars.githubusercontent.com/u/146118747?v=4" alt="Profile" className="w-full h-full object-cover" />
+              </div>
             </div>
           </motion.a>
-          
           <button onClick={() => setMode(mode === 'light' ? 'dark' : 'light')} className="p-3 opacity-60 hover:opacity-100">
-            <Lightbulb className={mode === 'light' ? 'fill-yellow-400 text-yellow-500' : ''} />
+            <Lightbulb className={mode === 'light' ? 'fill-yellow-400 text-yellow-500 w-5 h-5' : 'w-5 h-5'} />
           </button>
         </footer>
       </div>
