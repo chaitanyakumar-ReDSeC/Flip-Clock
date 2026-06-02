@@ -20,7 +20,7 @@ Access the latest stable version of PopCorn directly on your browser. Click on t
 </a>
 
 <p align="center">
-  <img src="https://github.com/chaitanyakumar-ReDSeC/assets/raw/main/general/image_assets/rainbow.png" width="100%">
+  <img src="https://github.com/chaitanyakumar-ReDSeC/assets/raw/main/general/image_assets/static/rainbow.png" width="100%">
 </p>
 
 ## ✨ Key Features
@@ -33,7 +33,7 @@ Access the latest stable version of PopCorn directly on your browser. Click on t
 * **Adaptive Themes**: Switch between a deep "Onyx Dark" and "Cloud Light" mode to match your environment.
 
 <p align="center">
-  <img src="https://github.com/chaitanyakumar-ReDSeC/assets/raw/main/general/image_assets/rainbow.png" width="100%">
+  <img src="https://github.com/chaitanyakumar-ReDSeC/assets/raw/main/general/image_assets/static/rainbow.png" width="100%">
 </p>
 
 ## 🛠️ Built With
@@ -45,7 +45,7 @@ Access the latest stable version of PopCorn directly on your browser. Click on t
 * **Screen Wake Lock API** for persistent display utility
 
 <p align="center">
-  <img src="https://github.com/chaitanyakumar-ReDSeC/assets/raw/main/general/image_assets/rainbow.png" width="100%">
+  <img src="https://github.com/chaitanyakumar-ReDSeC/assets/raw/main/general/image_assets/static/rainbow.png" width="100%">
 </p>
 
 ## 🚀 Deployment
@@ -55,7 +55,7 @@ This application is optimized for hosting on **GitHub Pages**.
 > **Note on Stay Awake**: The Screen Wake Lock feature requires a secure context (HTTPS). When hosted on GitHub Pages, the "Always-On" display functionality is fully enabled by default.
 
 <p align="center">
-  <img src="https://github.com/chaitanyakumar-ReDSeC/assets/raw/main/general/image_assets/rainbow.png" width="100%">
+  <img src="https://github.com/chaitanyakumar-ReDSeC/assets/raw/main/general/image_assets/static/rainbow.png" width="100%">
 </p>
 
 ## 🖱️ Interaction Guide
