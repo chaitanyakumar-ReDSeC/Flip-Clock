@@ -317,7 +317,7 @@ export default function App() {
           >
             <div className="relative w-full h-full transition-transform duration-500 group-hover:rotate-y-180" style={{ transformStyle: 'preserve-3d' }}>
               <div className="absolute inset-0 w-full h-full" style={{ backfaceVisibility: 'hidden' }}>
-                <img src="https://github.com/chaitanyakumar-ReDSeC/assets/raw/main/general/image_assets/git-hub.png" alt="GitHub Logo" className="w-full h-full object-cover" />
+                <img src="https://github.com/chaitanyakumar-ReDSeC/assets/raw/main/general/image_assets/static/git-hub.png" alt="GitHub Logo" className="w-full h-full object-cover" />
               </div>
               <div className="absolute inset-0 w-full h-full" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
                 <img src="https://avatars.githubusercontent.com/u/146118747?v=4" alt="Profile" className="w-full h-full object-cover" />
